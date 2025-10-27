@@ -1,2 +1,2 @@
-# Group-11-F25-Abhinav-Rami-Ricardo-Spencer
+# Group11F25
  Software Analysis and Design project.
