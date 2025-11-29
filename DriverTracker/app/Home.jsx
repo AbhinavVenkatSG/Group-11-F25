@@ -10,7 +10,8 @@ export default function Home() {
       {/* Settings icon top-left */}
       <TouchableOpacity
         style={styles.settingsButton}
-        onPress={() => { router.push('/Settings')
+        onPress={() => {
+          router.push('/Settings');
         }}
       >
         <Ionicons name="settings-outline" size={24} color="#0a0a0a" />
@@ -20,6 +21,15 @@ export default function Home() {
       <View style={styles.centerContent}>
         <Text style={styles.welcome}>Welcome to DriverTracker</Text>
         <Text style={styles.subtext}>You are now logged in.</Text>
+
+        {/* New button to go to StartTrip */}
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => router.push('/StartTrip')}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.buttonText}>Go to Start Trip</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -58,5 +68,22 @@ const styles = StyleSheet.create({
   subtext: {
     fontSize: 16,
     color: '#555',
+    marginBottom: 16,
+  },
+
+  button: {
+    width: '70%',
+    height: 48,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 12,
+    backgroundColor: '#0a84ff',
+  },
+
+  buttonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 16,
   },
 });
