@@ -5,6 +5,17 @@ import { Ionicons } from '@expo/vector-icons'; // built-in with Expo
 import { router } from 'expo-router';
 
 export default function Home() {
+  // Static for now; later you can load this from an API or storage
+  const driverScore = 92;
+
+  const handleStartTrip = () => {
+    router.push('/StartTrip');
+  };
+
+  const handleTripHistory = () => {
+    router.push('/TripHistory'); // create app/TripHistory.jsx to handle this
+  };
+
   return (
     <View style={styles.container}>
       {/* Settings icon top-left */}
@@ -22,13 +33,29 @@ export default function Home() {
         <Text style={styles.welcome}>Welcome to DriverTracker</Text>
         <Text style={styles.subtext}>You are now logged in.</Text>
 
-        {/* New button to go to StartTrip */}
+        {/* Driver Score card */}
+        <View style={styles.scoreCard}>
+          <Text style={styles.scoreLabel}>Driver Score</Text>
+          <Text style={styles.scoreValue}>{driverScore}</Text>
+          <Text style={styles.scoreSubtext}>Based on your recent trips</Text>
+        </View>
+
+        {/* Start Trip button */}
         <TouchableOpacity
           style={styles.button}
-          onPress={() => router.push('/StartTrip')}
+          onPress={handleStartTrip}
           activeOpacity={0.8}
         >
-          <Text style={styles.buttonText}>Go to Start Trip</Text>
+          <Text style={styles.buttonText}>Start a Trip</Text>
+        </TouchableOpacity>
+
+        {/* Trip History button */}
+        <TouchableOpacity
+          style={styles.buttonOutline}
+          onPress={handleTripHistory}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.buttonOutlineText}>View Trip History</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -71,6 +98,37 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
 
+  // Driver score card styles
+  scoreCard: {
+    width: '80%',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    marginBottom: 20,
+  },
+
+  scoreLabel: {
+    fontSize: 14,
+    color: '#6b7280',
+    marginBottom: 4,
+    fontWeight: '500',
+  },
+
+  scoreValue: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#111827',
+  },
+
+  scoreSubtext: {
+    fontSize: 12,
+    color: '#6b7280',
+    marginTop: 2,
+  },
+
   button: {
     width: '70%',
     height: 48,
@@ -83,6 +141,24 @@ const styles = StyleSheet.create({
 
   buttonText: {
     color: '#fff',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+
+  buttonOutline: {
+    width: '70%',
+    height: 48,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 10,
+    borderWidth: 1.5,
+    borderColor: '#0a84ff',
+    backgroundColor: 'transparent',
+  },
+
+  buttonOutlineText: {
+    color: '#0a84ff',
     fontWeight: '600',
     fontSize: 16,
   },

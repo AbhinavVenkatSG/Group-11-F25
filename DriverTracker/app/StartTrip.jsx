@@ -6,17 +6,36 @@ import { Picker } from '@react-native-picker/picker';
 
 export default function StartTrip() {
   const [selectedPlate, setSelectedPlate] = useState('SHWA 238');
+  const [isTripActive, setIsTripActive] = useState(false);
 
   const handleStartTrip = () => {
-    // Show popup / notification
+    if (isTripActive) {
+      Alert.alert('Trip Already Active', 'You already have an active trip.');
+      return;
+    }
+
+    setIsTripActive(true);
+
     Alert.alert(
       'Trip Started',
       `Trip started for license plate: ${selectedPlate}`,
       [{ text: 'OK' }]
     );
+  };
 
-    // Later you can also navigate or save state here if needed
-    // e.g. router.push('/SomeNextScreen');
+  const handleEndTrip = () => {
+    if (!isTripActive) {
+      Alert.alert('No Active Trip', 'There is no active trip to end.');
+      return;
+    }
+
+    setIsTripActive(false);
+
+    Alert.alert(
+      'Trip Ended',
+      `Trip ended for license plate: ${selectedPlate}`,
+      [{ text: 'OK' }]
+    );
   };
 
   return (
@@ -42,9 +61,33 @@ export default function StartTrip() {
           </Picker>
         </View>
 
-        <TouchableOpacity style={styles.button} onPress={handleStartTrip}>
+        {/* Start Trip */}
+        <TouchableOpacity
+          style={[styles.button, isTripActive && styles.buttonDisabled]}
+          onPress={handleStartTrip}
+          activeOpacity={0.8}
+          disabled={isTripActive}
+        >
           <Text style={styles.buttonText}>Start A Trip</Text>
         </TouchableOpacity>
+
+        {/* End Trip */}
+        <TouchableOpacity
+          style={[
+            styles.buttonSecondary,
+            !isTripActive && styles.buttonDisabled,
+          ]}
+          onPress={handleEndTrip}
+          activeOpacity={0.8}
+          disabled={!isTripActive}
+        >
+          <Text style={styles.buttonSecondaryText}>End Trip</Text>
+        </TouchableOpacity>
+
+        {/* Optional status text */}
+        <Text style={styles.statusText}>
+          Status: {isTripActive ? 'Trip in progress' : 'No active trip'}
+        </Text>
       </View>
     </View>
   );
@@ -58,6 +101,7 @@ const styles = StyleSheet.create({
   title: { fontSize: 28, fontWeight: '700', color: '#0a0a0a', marginTop: 8 },
   content: { marginTop: 16 },
   label: { fontSize: 16, fontWeight: '500', color: '#0a0a0a', marginBottom: 8 },
+
   pickerContainer: {
     borderWidth: 1,
     borderColor: '#ddd',
@@ -65,6 +109,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f9fafb',
     marginBottom: 20,
   },
+
   button: {
     width: '100%',
     height: 48,
@@ -74,5 +119,35 @@ const styles = StyleSheet.create({
     marginTop: 12,
     backgroundColor: '#0a84ff',
   },
+
   buttonText: { color: '#fff', fontWeight: '600', fontSize: 16 },
+
+  buttonSecondary: {
+    width: '100%',
+    height: 48,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 12,
+    borderWidth: 1.5,
+    borderColor: '#0a84ff',
+    backgroundColor: '#fff',
+  },
+
+  buttonSecondaryText: {
+    color: '#0a84ff',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+
+  buttonDisabled: {
+    opacity: 0.5,
+  },
+
+  statusText: {
+    marginTop: 16,
+    fontSize: 14,
+    color: '#6b7280',
+    textAlign: 'center',
+  },
 });

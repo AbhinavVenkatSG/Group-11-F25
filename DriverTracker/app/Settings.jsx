@@ -6,29 +6,27 @@ import { router } from 'expo-router';
 
 export default function Settings() {
   const handleViewAccountInfo = () => {
-    Alert.alert('View Account Info', 'This will show the user’s account details.');
-    // later: router.push('/AccountInfo');
+    router.push('/AccountInfo');
   };
 
   const handleUpdateAccountInfo = () => {
-    Alert.alert('Update Account Info', 'This will let the user edit their account details.');
-    // later: router.push('/UpdateAccount');
+    router.push('/UpdateAccount');
   };
 
   const handleDeleteAccount = () => {
+    // Still just a warning for now – no DeleteAccount screen yet
     Alert.alert('Delete Account', 'This will start the account deletion flow.');
     // later: router.push('/DeleteAccount');
   };
 
   const handleVehicleSettings = () => {
-    Alert.alert('Vehicle Settings', 'This will open vehicle-related settings.');
-    // later: router.push('/VehicleSettings');
+    router.push('/VehicleSettings');
   };
 
-    const handleLogOutSettings = () => {
-     Alert.alert('Logged Out Settings', 'Successfully Logged Out.');
-     router.replace('/'); // Go to Login Page
-    };
+  const handleLogOutSettings = () => {
+    Alert.alert('Logged Out', 'Successfully logged out.');
+    router.replace('/'); // Go to Login Page
+  };
 
   return (
     <View style={styles.container}>
@@ -65,7 +63,6 @@ export default function Settings() {
         <TouchableOpacity style={styles.item} onPress={handleDeleteAccount}>
           <Text style={[styles.itemText, styles.dangerText]}>Delete Account</Text>
         </TouchableOpacity>
-
       </View>
     </View>
   );
