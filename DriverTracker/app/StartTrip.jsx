@@ -38,12 +38,25 @@ export default function StartTrip() {
     );
   };
 
+  const handleBackPress = () => {
+    if (isTripActive) {
+      Alert.alert(
+        'Trip In Progress',
+        'You must end the current trip before leaving this page.'
+      );
+      return;
+    }
+    router.back();
+  };
+
   return (
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Text style={styles.backText}>← Home</Text>
+        <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
+          <Text style={[styles.backText, isTripActive && styles.backTextDisabled]}>
+            ← Home
+          </Text>
         </TouchableOpacity>
         <Text style={styles.title}>Start Trip</Text>
       </View>
@@ -56,6 +69,7 @@ export default function StartTrip() {
           <Picker
             selectedValue={selectedPlate}
             onValueChange={setSelectedPlate}
+            enabled={!isTripActive} // lock plate selection during active trip
           >
             <Picker.Item label="SHWA 238" value="SHWA 238" />
           </Picker>
@@ -84,9 +98,9 @@ export default function StartTrip() {
           <Text style={styles.buttonSecondaryText}>End Trip</Text>
         </TouchableOpacity>
 
-        {/* Optional status text */}
+        {/* Status text */}
         <Text style={styles.statusText}>
-          Status: {isTripActive ? 'Trip in progress' : 'No active trip'}
+          Status: {isTripActive ? 'Trip in progress (page locked)' : 'No active trip'}
         </Text>
       </View>
     </View>
@@ -98,6 +112,7 @@ const styles = StyleSheet.create({
   header: { marginBottom: 24 },
   backButton: { alignSelf: 'flex-start', paddingVertical: 6, paddingHorizontal: 2 },
   backText: { fontSize: 16, color: '#0a84ff', fontWeight: '600' },
+  backTextDisabled: { color: '#9ca3af' },
   title: { fontSize: 28, fontWeight: '700', color: '#0a0a0a', marginTop: 8 },
   content: { marginTop: 16 },
   label: { fontSize: 16, fontWeight: '500', color: '#0a0a0a', marginBottom: 8 },
