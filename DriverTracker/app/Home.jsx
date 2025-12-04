@@ -1,12 +1,32 @@
 // app/Home.jsx
-import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, View, Text, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons'; // built-in with Expo
 import { router } from 'expo-router';
+import { useSession } from '../utils/session';
+import { getJson } from '../config/api';
 
 export default function Home() {
-  // Static for now; later you can load this from an API or storage
-  const driverScore = 92;
+  const { driver } = useSession();
+  const [driverScore, setDriverScore] = useState(null);
+
+  useEffect(() => {
+    if (!driver) {
+      router.replace('/');
+      return;
+    }
+
+    const loadScore = async () => {
+      if (!driver) return;
+      try {
+        const data = await getJson(`/api/analytics/${driver.driverId}`);
+        setDriverScore(data.driverScore);
+      } catch (error) {
+        Alert.alert('Analytics error', error.message);
+      }
+    };
+    loadScore();
+  }, [driver]);
 
   const handleStartTrip = () => {
     router.push('/StartTrip');
@@ -30,13 +50,13 @@ export default function Home() {
 
       {/* Basic content in the middle */}
       <View style={styles.centerContent}>
-        <Text style={styles.welcome}>Welcome to DriverTracker</Text>
+        <Text style={styles.welcome}>Welcome {driver?.name ?? 'Driver'}</Text>
         <Text style={styles.subtext}>You are now logged in.</Text>
 
         {/* Driver Score card */}
         <View style={styles.scoreCard}>
           <Text style={styles.scoreLabel}>Driver Score</Text>
-          <Text style={styles.scoreValue}>{driverScore}</Text>
+          <Text style={styles.scoreValue}>{driverScore ?? '--'}</Text>
           <Text style={styles.scoreSubtext}>Based on your recent trips</Text>
         </View>
 

@@ -1,77 +1,53 @@
 // app/TripHistory.jsx
-import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, FlatList } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, View, Text, TouchableOpacity, FlatList, Alert } from 'react-native';
 import { router } from 'expo-router';
-
-const SAMPLE_TRIPS = [
-  {
-    id: '1',
-    date: '2025-11-28',
-    startTime: '08:15',
-    endTime: '09:05',
-    plate: 'SHWA 238',
-    distance: '24.3 km',
-    scoreImpact: '+2',
-    rating: 'Excellent',
-  },
-  {
-    id: '2',
-    date: '2025-11-27',
-    startTime: '14:10',
-    endTime: '14:45',
-    plate: 'SHWA 238',
-    distance: '12.8 km',
-    scoreImpact: '+1',
-    rating: 'Good',
-  },
-  {
-    id: '3',
-    date: '2025-11-26',
-    startTime: '17:30',
-    endTime: '18:20',
-    plate: 'SHWA 238',
-    distance: '31.6 km',
-    scoreImpact: '0',
-    rating: 'Neutral',
-  },
-];
+import { useSession } from '../utils/session';
+import { getJson } from '../config/api';
 
 export default function TripHistory() {
+  const { driver } = useSession();
+  const [trips, setTrips] = useState([]);
+  const [vehicleMap, setVehicleMap] = useState({});
+
+  useEffect(() => {
+    if (!driver) {
+      router.replace('/');
+      return;
+    }
+
+    const load = async () => {
+      if (!driver) return;
+      try {
+        const [list, vehicles] = await Promise.all([
+          getJson(`/api/trips/by-driver/${driver.driverId}`),
+          getJson(`/api/vehicles/by-driver/${driver.driverId}`),
+        ]);
+        setTrips(list);
+        const map = {};
+        vehicles.forEach((v) => {
+          map[v.vehicleId] = `${v.carName} (${v.plateNumber})`;
+        });
+        setVehicleMap(map);
+      } catch (error) {
+        Alert.alert('Trip error', error.message);
+      }
+    };
+    load();
+  }, [driver]);
+
   const renderItem = ({ item }) => (
     <View style={styles.tripCard}>
       <View style={styles.tripRow}>
-        <Text style={styles.tripDate}>{item.date}</Text>
-        <Text style={styles.tripPlate}>{item.plate}</Text>
+        <Text style={styles.tripDate}>{new Date(item.startTime).toLocaleDateString()}</Text>
+        <Text style={styles.tripPlate}>{vehicleMap[item.vehicleId] ?? item.vehicleId}</Text>
       </View>
 
       <View style={styles.tripRow}>
         <Text style={styles.tripLabel}>Time</Text>
         <Text style={styles.tripValue}>
-          {item.startTime} - {item.endTime}
+          {new Date(item.startTime).toLocaleTimeString()} - {new Date(item.endTime).toLocaleTimeString()}
         </Text>
-      </View>
-
-      <View style={styles.tripRow}>
-        <Text style={styles.tripLabel}>Distance</Text>
-        <Text style={styles.tripValue}>{item.distance}</Text>
-      </View>
-
-      <View style={styles.tripRow}>
-        <Text style={styles.tripLabel}>Score Impact</Text>
-        <Text
-          style={[
-            styles.tripValue,
-            item.scoreImpact.startsWith('+') && styles.positiveScore,
-            item.scoreImpact.startsWith('-') && styles.negativeScore,
-          ]}
-        >
-          {item.scoreImpact}
-        </Text>
-      </View>
-
-      <View style={styles.tripRow}>
-        <Text style={styles.tripLabel}>Rating</Text>
-        <Text style={styles.tripValue}>{item.rating}</Text>
       </View>
     </View>
   );
@@ -93,12 +69,16 @@ export default function TripHistory() {
       <View style={styles.content}>
         <Text style={styles.subtitle}>Recent Trips</Text>
 
-        <FlatList
-          data={SAMPLE_TRIPS}
-          keyExtractor={(item) => item.id}
-          renderItem={renderItem}
-          contentContainerStyle={styles.listContent}
-        />
+        {trips.length === 0 ? (
+          <Text style={styles.emptyText}>No trips yet.</Text>
+        ) : (
+          <FlatList
+            data={trips}
+            keyExtractor={(item) => item.tripId}
+            renderItem={renderItem}
+            contentContainerStyle={styles.listContent}
+          />
+        )}
       </View>
     </View>
   );
@@ -197,4 +177,5 @@ const styles = StyleSheet.create({
   negativeScore: {
     color: '#dc2626',
   },
+  emptyText: { fontSize: 14, color: '#6b7280' },
 });

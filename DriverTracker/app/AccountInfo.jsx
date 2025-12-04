@@ -2,14 +2,18 @@
 import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
+import { useSession } from '../utils/session';
 
 export default function AccountInfo() {
-  // Later you can pull real user data from context / API
-  const mockUser = {
-    name: 'John Doe',
-    email: 'john.doe@example.com',
-    role: 'Driver',
-  };
+  const { driver } = useSession();
+
+  if (!driver) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.value}>Not logged in.</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -28,17 +32,17 @@ export default function AccountInfo() {
       <View style={styles.card}>
         <View style={styles.row}>
           <Text style={styles.label}>Name</Text>
-          <Text style={styles.value}>{mockUser.name}</Text>
+          <Text style={styles.value}>{driver?.name ?? 'Not set'}</Text>
         </View>
 
         <View style={styles.row}>
           <Text style={styles.label}>Email</Text>
-          <Text style={styles.value}>{mockUser.email}</Text>
+          <Text style={styles.value}>{driver?.emailAddress ?? 'Not set'}</Text>
         </View>
 
         <View style={styles.row}>
           <Text style={styles.label}>Role</Text>
-          <Text style={styles.value}>{mockUser.role}</Text>
+          <Text style={styles.value}>Driver</Text>
         </View>
       </View>
     </View>

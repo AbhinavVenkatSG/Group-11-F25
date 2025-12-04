@@ -1,44 +1,79 @@
 // app/VehicleSettings.jsx
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   StyleSheet, View, Text, TextInput, TouchableOpacity, FlatList, Alert,
 } from 'react-native';
 import { router } from 'expo-router';
+import { postJson, getJson, deleteJson } from '../config/api';
+import { useSession } from '../utils/session';
 
 export default function VehicleSettings() {
+  const { driver } = useSession();
   const [carName, setCarName] = useState('');
   const [plate, setPlate] = useState('');
   const [vehicles, setVehicles] = useState([]);
 
-  const handleAddVehicle = () => {
+  useEffect(() => {
+    if (!driver) {
+      router.replace('/');
+      return;
+    }
+
+    const load = async () => {
+      if (!driver) return;
+      try {
+        const list = await getJson(`/api/vehicles/by-driver/${driver.driverId}`);
+        setVehicles(list);
+      } catch (error) {
+        Alert.alert('Vehicle error', error.message);
+      }
+    };
+    load();
+  }, [driver]);
+
+  const handleAddVehicle = async () => {
+    if (!driver) {
+      Alert.alert('Not logged in', 'Please log in again.');
+      return;
+    }
+
     if (!carName.trim() || !plate.trim()) {
       Alert.alert('Missing Info', 'Please enter both car name and license plate.');
       return;
     }
 
-    const newVehicle = {
-      id: Date.now().toString(),
-      name: carName.trim(),
-      plate: plate.trim(),
-    };
+    try {
+      const created = await postJson('/api/vehicles', {
+        driverId: driver.driverId,
+        plateNumber: plate.trim(),
+        carName: carName.trim(),
+      });
 
-    setVehicles((prev) => [...prev, newVehicle]);
-    setCarName('');
-    setPlate('');
-    Alert.alert('Vehicle Added', `${newVehicle.name} (${newVehicle.plate}) has been added.`);
+      setVehicles((prev) => [...prev, created]);
+      setCarName('');
+      setPlate('');
+      Alert.alert('Vehicle Added', `${created.carName} (${created.plateNumber}) has been added.`);
+    } catch (error) {
+      Alert.alert('Add failed', error.message);
+    }
   };
 
   const handleDeleteVehicle = (vehicle) => {
     Alert.alert(
       'Delete Vehicle',
-      `Remove ${vehicle.name} (${vehicle.plate}) from saved vehicles?`,
+      `Remove ${vehicle.carName} (${vehicle.plateNumber}) from saved vehicles?`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Delete',
           style: 'destructive',
-          onPress: () => {
-            setVehicles((prev) => prev.filter((v) => v.id !== vehicle.id));
+          onPress: async () => {
+            try {
+              await deleteJson(`/api/vehicles/${vehicle.vehicleId}`);
+              setVehicles((prev) => prev.filter((v) => v.vehicleId !== vehicle.vehicleId));
+            } catch (error) {
+              Alert.alert('Delete failed', error.message);
+            }
           },
         },
       ]
@@ -48,8 +83,8 @@ export default function VehicleSettings() {
   const renderItem = ({ item }) => (
     <View style={styles.vehicleItem}>
       <View style={styles.vehicleInfo}>
-        <Text style={styles.vehicleName}>{item.name}</Text>
-        <Text style={styles.vehiclePlate}>{item.plate}</Text>
+        <Text style={styles.vehicleName}>{item.carName}</Text>
+        <Text style={styles.vehiclePlate}>{item.plateNumber}</Text>
       </View>
 
       <TouchableOpacity
@@ -108,7 +143,7 @@ export default function VehicleSettings() {
         ) : (
           <FlatList
             data={vehicles}
-            keyExtractor={(item) => item.id}
+            keyExtractor={(item) => item.vehicleId}
             renderItem={renderItem}
           />
         )}

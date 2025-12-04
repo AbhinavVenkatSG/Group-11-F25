@@ -3,8 +3,17 @@
 import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Alert } from 'react-native';
 import { router } from 'expo-router';
+import { deleteJson } from '../config/api';
+import { useSession } from '../utils/session';
 
 export default function Settings() {
+  const { driver, clear } = useSession();
+
+  if (!driver) {
+    router.replace('/');
+    return null;
+  }
+
   const handleViewAccountInfo = () => {
     router.push('/AccountInfo');
   };
@@ -14,9 +23,31 @@ export default function Settings() {
   };
 
   const handleDeleteAccount = () => {
-    // Still just a warning for now – no DeleteAccount screen yet
-    Alert.alert('Delete Account', 'This will start the account deletion flow.');
-    // later: router.push('/DeleteAccount');
+    if (!driver) {
+      Alert.alert('Not logged in', 'Please log in again.');
+      return;
+    }
+
+    Alert.alert(
+      'Delete Account',
+      'This will permanently delete your account.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteJson(`/api/drivers/${driver.driverId}`);
+              clear();
+              router.replace('/');
+            } catch (error) {
+              Alert.alert('Delete failed', error.message);
+            }
+          },
+        },
+      ],
+    );
   };
 
   const handleVehicleSettings = () => {
@@ -24,6 +55,7 @@ export default function Settings() {
   };
 
   const handleLogOutSettings = () => {
+    clear();
     Alert.alert('Logged Out', 'Successfully logged out.');
     router.replace('/'); // Go to Login Page
   };

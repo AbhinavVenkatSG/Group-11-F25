@@ -4,16 +4,36 @@ import {
   StyleSheet, View, Text, TextInput, TouchableOpacity, Alert,
 } from 'react-native';
 import { router } from 'expo-router';
+import { putJson } from '../config/api';
+import { useSession } from '../utils/session';
+import { isValidEmail } from '../utils/validation';
 
 export default function UpdateAccount() {
-  // You can pre-fill these from real data later
-  const [name, setName] = useState('John Doe');
-  const [email, setEmail] = useState('john.doe@example.com');
+  const { driver, setDriver } = useSession();
+  const [name, setName] = useState(driver?.name ?? '');
+  const [email, setEmail] = useState(driver?.emailAddress ?? '');
 
-  const handleSave = () => {
-    // Later: send to API
-    Alert.alert('Account Updated', 'Your account details have been saved.');
-    router.back();
+  const handleSave = async () => {
+    if (!driver) {
+      return Alert.alert('Not logged in', 'Please log in again.');
+    }
+
+    if (email && !isValidEmail(email)) {
+      return Alert.alert('Invalid email', 'Please enter a valid email.');
+    }
+
+    try {
+      const updated = await putJson(`/api/drivers/${driver.driverId}`, {
+        name: name?.trim() || undefined,
+        emailAddress: email?.trim() || undefined,
+        password: undefined,
+      });
+      setDriver(updated);
+      Alert.alert('Account Updated', 'Your account details have been saved.');
+      router.back();
+    } catch (error) {
+      Alert.alert('Update failed', error.message);
+    }
   };
 
   return (
