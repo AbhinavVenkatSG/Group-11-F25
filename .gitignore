@@ -1,0 +1,14 @@
+# Build outputs
+bin/
+obj/
+
+# User-specific files
+*.user
+*.userprefs
+
+# Visual Studio Code
+.vscode/
+
+# Entity Framework generated files
+*.db
+*.db-journal
